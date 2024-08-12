@@ -1,0 +1,15 @@
+DECLARE
+    CURSOR customer_cursor IS
+        SELECT c.CustomerId, c.Age, l.LoanId, l.InterestRate
+        FROM Customers c
+        JOIN Loans l ON c.CustomerId = l.CustomerId;
+BEGIN
+    FOR rec IN customer_cursor LOOP
+        IF rec.Age > 60 THEN
+            UPDATE Loans
+            SET InterestRate = InterestRate * 0.99
+            WHERE LoanId = rec.LoanId;
+            DBMS_OUTPUT.PUT_LINE('Discount applied to CustomerId: ' || rec.CustomerId);
+        END IF;
+    END LOOP;
+END;
