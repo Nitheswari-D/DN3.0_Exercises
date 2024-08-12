@@ -1,0 +1,23 @@
+DECLARE
+    CURSOR cur_monthly_transactions IS
+        SELECT CustomerId, TransactionId, Amount, TransactionDate
+        FROM Transactions
+        WHERE EXTRACT(MONTH FROM TransactionDate) = EXTRACT(MONTH FROM SYSDATE)
+          AND EXTRACT(YEAR FROM TransactionDate) = EXTRACT(YEAR FROM SYSDATE);
+
+    v_customer_id      Transactions.CustomerId%TYPE;
+    v_transaction_id   Transactions.TransactionId%TYPE;
+    v_amount           Transactions.Amount%TYPE;
+    v_transaction_date Transactions.TransactionDate%TYPE;
+BEGIN
+    OPEN cur_monthly_transactions;
+    LOOP
+        FETCH cur_monthly_transactions INTO v_customer_id, v_transaction_id, v_amount, v_transaction_date;
+        EXIT WHEN cur_monthly_transactions%NOTFOUND;
+
+        -- Print statement for each customer
+        DBMS_OUTPUT.PUT_LINE('Customer ID: ' || v_customer_id);
+        DBMS_OUTPUT.PUT_LINE('Transaction ID: ' || v_transaction_id || ', Amount: ' || v_amount || ', Date: ' || v_transaction_date);
+    END LOOP;
+    CLOSE cur_monthly_transactions;
+END;
