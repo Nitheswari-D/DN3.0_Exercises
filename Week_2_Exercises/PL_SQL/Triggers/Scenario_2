@@ -1,0 +1,8 @@
+CREATE OR REPLACE TRIGGER LogTransaction
+AFTER INSERT ON Transactions
+FOR EACH ROW
+BEGIN
+    -- Insert a record into the AuditLog table
+    INSERT INTO AuditLog (TransactionId, Action, ActionDate)
+    VALUES (:NEW.TransactionId, 'INSERT', SYSDATE);
+END LogTransaction;
