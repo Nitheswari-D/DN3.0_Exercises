@@ -1,0 +1,23 @@
+CREATE OR REPLACE PROCEDURE UpdateSalary(
+    p_employee_id IN NUMBER,
+    p_percentage IN NUMBER
+) IS
+    v_salary NUMBER;
+BEGIN
+    -- Fetch current salary and lock the row
+    SELECT Salary INTO v_salary FROM Employees WHERE EmployeeId = p_employee_id FOR UPDATE;
+
+    -- Update salary
+    UPDATE Employees
+    SET Salary = Salary + (Salary * p_percentage / 100)
+    WHERE EmployeeId = p_employee_id;
+
+    DBMS_OUTPUT.PUT_LINE('Salary updated successfully for EmployeeId ' || p_employee_id);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        INSERT INTO ErrorLog(ErrorTime, ErrorMessage) VALUES(SYSDATE, 'EmployeeId ' || p_employee_id || ' not found');
+        DBMS_OUTPUT.PUT_LINE('Update failed: EmployeeId not found');
+    WHEN OTHERS THEN
+        INSERT INTO ErrorLog(ErrorTime, ErrorMessage) VALUES(SYSDATE, SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Update failed: ' || SQLERRM);
+END UpdateSalary;

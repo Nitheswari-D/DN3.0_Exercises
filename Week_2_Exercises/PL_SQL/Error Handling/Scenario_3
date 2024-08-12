@@ -1,0 +1,27 @@
+CREATE OR REPLACE PROCEDURE AddNewCustomer(
+    p_customer_id IN NUMBER,
+    p_name IN VARCHAR2,
+    p_email IN VARCHAR2
+) IS
+    e_customer_exists EXCEPTION;
+    v_count NUMBER;
+BEGIN
+    -- Check if customer already exists
+    SELECT COUNT(*) INTO v_count FROM Customers WHERE CustomerId = p_customer_id;
+
+    IF v_count > 0 THEN
+        RAISE e_customer_exists;
+    END IF;
+
+    -- Insert new customer
+    INSERT INTO Customers(CustomerId, Name, Email) VALUES(p_customer_id, p_name, p_email);
+
+    DBMS_OUTPUT.PUT_LINE('Customer added successfully');
+EXCEPTION
+    WHEN e_customer_exists THEN
+        INSERT INTO ErrorLog(ErrorTime, ErrorMessage) VALUES(SYSDATE, 'CustomerId ' || p_customer_id || ' already exists');
+        DBMS_OUTPUT.PUT_LINE('Add customer failed: CustomerId already exists');
+    WHEN OTHERS THEN
+        INSERT INTO ErrorLog(ErrorTime, ErrorMessage) VALUES(SYSDATE, SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Add customer failed: ' || SQLERRM);
+END AddNewCustomer;

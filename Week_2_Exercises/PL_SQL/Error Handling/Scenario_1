@@ -1,0 +1,39 @@
+CREATE OR REPLACE PROCEDURE SafeTransferFunds(
+    p_from_account_id IN NUMBER,
+    p_to_account_id IN NUMBER,
+    p_amount IN NUMBER
+) IS
+    e_insufficient_funds EXCEPTION;
+    v_from_balance NUMBER;
+    v_to_balance NUMBER;
+BEGIN
+    -- Start transaction
+    SET TRANSACTION;
+
+    -- Get current balances
+    SELECT Balance INTO v_from_balance FROM Accounts WHERE AccountId = p_from_account_id FOR UPDATE;
+    SELECT Balance INTO v_to_balance FROM Accounts WHERE AccountId = p_to_account_id FOR UPDATE;
+
+    -- Check for sufficient funds
+    IF v_from_balance < p_amount THEN
+        RAISE e_insufficient_funds;
+    END IF;
+
+    -- Perform the fund transfer
+    UPDATE Accounts SET Balance = Balance - p_amount WHERE AccountId = p_from_account_id;
+    UPDATE Accounts SET Balance = Balance + p_amount WHERE AccountId = p_to_account_id;
+
+    -- Commit transaction
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Transfer successful');
+EXCEPTION
+    WHEN e_insufficient_funds THEN
+        ROLLBACK;
+        INSERT INTO ErrorLog(ErrorTime, ErrorMessage) VALUES(SYSDATE, 'Insufficient funds for account ' || p_from_account_id);
+        DBMS_OUTPUT.PUT_LINE('Transfer failed: Insufficient funds');
+    WHEN OTHERS THEN
+        ROLLBACK;
+        INSERT INTO ErrorLog(ErrorTime, ErrorMessage) VALUES(SYSDATE, SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Transfer failed: ' || SQLERRM);
+END SafeTransferFunds;
