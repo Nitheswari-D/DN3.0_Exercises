@@ -1,0 +1,14 @@
+<!-- File: pom.xml -->
+<dependencies>
+    <!-- JSON support (included by default in Spring Boot) -->
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <!-- XML support -->
+    <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-xml</artifactId>
+    </dependency>
+</dependencies>
